@@ -1,0 +1,75 @@
+Term Work 6
+Write a program to implement the naïve Bayesian classifier for a sample training data set stored as a .CSV file. Compute the accuracy of the classifier, considering few test data sets.
+P6.py
+import pandas as pd
+msg=pd.read_csv('DataSet6.csv',names=['message','label']) #Tabular form data
+print('Total instances in the dataset:',msg.shape[0])
+msg['labelnum']=msg.label.map({'pos':1,'neg':0})
+X=msg.message
+Y=msg.labelnum
+
+print('\nThe message and its label of first 5 instances are listed below')
+#X5, Y5 = X[0:5], msg.label[0:5]
+for x, y in zip(X[:5],Y[:5]):
+    print(x,',',y)
+# Splitting the dataset into train and test data
+
+from sklearn.model_selection import train_test_split
+xtrain,xtest,ytrain,ytest=train_test_split(X,Y)
+print('\nDataset is split into Training and Testing samples')
+print('Total training instances :', xtrain.shape[0])
+print('Total testing instances :', xtest.shape[0])
+
+# Output of count vectoriser is a sparse matrix
+# CountVectorizer - stands for 'feature extraction'
+from sklearn.feature_extraction.text import CountVectorizer
+count_vect = CountVectorizer()
+xtrain_dtm = count_vect.fit_transform(xtrain) #Sparse matrix
+xtest_dtm = count_vect.transform(xtest)
+print('\nTotal features extracted using CountVectorizer:',xtrain_dtm.shape[1])
+print('\nFeatures for first 5 training instances are listed below')
+
+df=pd.DataFrame(xtrain_dtm.toarray(),columns=count_vect.get_feature_names())
+print(df[0:5])#tabular representation
+#print(xtrain_dtm) #Same as above but sparse matrix representation
+# Training Naive Bayes (NB) classifier on training data.
+
+from sklearn.naive_bayes import MultinomialNB
+clf = MultinomialNB().fit(xtrain_dtm,ytrain)
+predicted = clf.predict(xtest_dtm)
+
+print('\nClassstification results of testing samples are given below')
+for doc, p in zip(xtest, predicted):
+    pred = 'pos' if p==1 else 'neg'
+    print('%s -> %s ' % (doc, pred))
+    
+#printing accuracy metrics
+from sklearn import metrics
+print('\nAccuracy metrics')
+print('Accuracy of the classifer is',metrics.accuracy_score(ytest,predicted))
+print('Recall :',metrics.recall_score(ytest,predicted),
+'\nPrecison :',metrics.precision_score(ytest,predicted))
+print('Confusion matrix')
+print(metrics.confusion_matrix(predicted,ytest))
+
+Dataset: 
+I love this sandwich	pos
+This is an amazing place	pos
+I feel very good about these beers	pos
+This is my best work	pos
+What an awesome view	pos
+I do not like this restaurant	neg
+I am tired of this stuff	neg
+I can't deal with this	neg
+He is my sworn enemy	neg
+My boss is horrible	neg
+This is an awesome place	pos
+I do not like the taste of this juice	neg
+I love to dance	pos
+I am sick and tired of this place	neg
+What a great holiday	pos
+That is a bad locality to stay	neg
+We will have good fun tomorrow	pos
+I went to my enemy's house today	neg
+
+
