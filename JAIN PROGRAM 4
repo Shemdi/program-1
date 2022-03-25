@@ -1,0 +1,36 @@
+Program 4
+Write a program to demonstrate the working of the
+decision tree based ID3 algorithm. Use an appropriate
+data set for building the decision tree and apply this
+knowledge toclassify a new sample.
+In [4]: import numpy as np
+import pandas as pd
+from pprint import pprint
+data=pd.read_csv("PlayTennis.csv")
+data_size=len(data)
+treenodes=[]
+tree={"Root":data}
+def total_entropy(data,col):
+ mydict={}
+ for elem in data[col]:
+ if elem in mydict.keys():
+ mydict[elem]+=1
+ else:
+ mydict[elem]=1
+ total=sum(mydict.values())
+ E=0
+ for key in mydict.keys():
+ E+=entropy(mydict[key],total)
+ return E
+def entropy (num,denom):
+ return -(num/denom)*np.log2(num/denom)
+def get_sorted_data(data,column):
+ sort={}
+ for column_name in get_attributes(data,column):
+ sort[column_name]=data.loc[data[column]==column_name]
+ return sort
+def get_attributes(data,column):
+ return data[column].unique().tolist()
+def InfoGain(total_entropy,sorted_data,entropy_by_attribute):
+ length=data_size
+ total=0
